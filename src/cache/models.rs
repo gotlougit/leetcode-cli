@@ -237,8 +237,8 @@ pub struct VerifyResult {
     pub state: String,
     #[serde(skip)]
     pub name: String,
-    #[serde(skip)]
-    pub data_input: String,
+    // #[serde(skip)]
+    // pub data_input: String,
     #[serde(skip)]
     pub result_type: Run,
     // #[serde(default)]
@@ -258,7 +258,7 @@ pub struct VerifyResult {
     #[serde(default, deserialize_with = "ssr")]
     expected_output: Vec<String>,
     #[serde(default, deserialize_with = "ssr")]
-    std_output: Vec<String>,
+    std_output_list: Vec<String>,
 
     // flatten
     // #[serde(flatten, default)]
@@ -295,12 +295,10 @@ impl std::fmt::Display for VerifyResult {
                     // Pass Tests
                     write!(
                         f,
-                        "\n{}{}{}\n{}{}{}{}{}{}\n",
+                        "\n{}{}{}\n{}{}{}{}\n",
                         &self.status.status_msg.green().bold(),
                         &"Runtime: ".before_spaces(7).dimmed(),
                         &self.status.status_runtime.dimmed(),
-                        &"\nYour input:".after_spaces(4),
-                        &self.data_input.replace('\n', "↩ "),
                         &"\nOutput:".after_spaces(8),
                         ca,
                         &"\nExpected:".after_spaces(6),
@@ -376,12 +374,10 @@ impl std::fmt::Display for VerifyResult {
                     // Wrong Answer during testing
                     write!(
                         f,
-                        "\n{}{}{}\n{}{}{}{}{}{}\n",
+                        "\n{}{}{}\n{}{}{}{}\n",
                         "Wrong Answer".red().bold(),
                         "   Runtime: ".dimmed(),
                         &self.status.status_runtime.dimmed(),
-                        &"\nYour input:".after_spaces(4),
-                        &self.data_input.replace('\n', "↩ "),
                         &"\nOutput:".after_spaces(8),
                         ca,
                         &"\nExpected:".after_spaces(6),
@@ -419,13 +415,7 @@ impl std::fmt::Display for VerifyResult {
                 self.expected_output[0],
             )?,
             // Memory Exceeded
-            12 => write!(
-                f,
-                "\n{}\n\n{}{}\n",
-                &self.status.status_msg.yellow().bold(),
-                &"Last case:".after_spaces(5).dimmed(),
-                &self.data_input.replace('\n', "↩ "),
-            )?,
+            12 => write!(f, "\n{}\n\n", &self.status.status_msg.yellow().bold(),)?,
             // Output Timeout Exceeded
             //
             // TODO: 13 and 14 might have some different,
@@ -475,12 +465,12 @@ impl std::fmt::Display for VerifyResult {
                 }
             }
             _ => {
-                if !self.std_output.is_empty() {
+                if !self.std_output_list.is_empty() {
                     write!(
                         f,
                         "{}{}",
                         &"Stdout:".after_spaces(8).purple(),
-                        &self.std_output[0].replace('\n', &"\n".after_spaces(15))
+                        &self.std_output_list[0].replace('\n', &"\n".after_spaces(15))
                     )
                 } else {
                     write!(f, "")

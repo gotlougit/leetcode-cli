@@ -22,14 +22,12 @@ pub fn conn(p: String) -> SqliteConnection {
 }
 
 /// Condition submit or test
-#[derive(Clone, Debug)]
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub enum Run {
     Test,
     #[default]
     Submit,
 }
-
 
 /// Requests if data not download
 #[derive(Clone)]
@@ -284,10 +282,6 @@ impl Cache {
         // 2. if test cases file exist, use the file test cases(user can edit it)
         // 3. test cases from problem desc all test cases
         // 4. sample test case from the task
-        let test_case = test_case
-            .or(maybe_file_testcases)
-            .or(maybe_all_testcases)
-            .unwrap_or(d.case);
 
         File::open(code_path(&p, None)?)?.read_to_string(&mut code)?;
 
@@ -311,7 +305,7 @@ impl Cache {
 
         // pass manually data
         json.insert("name", p.name.to_string());
-        json.insert("data_input", test_case);
+        // json.insert("data_input", test_case);
 
         let url = match run {
             Run::Test => conf.sys.urls.test(&p.slug),
@@ -381,7 +375,7 @@ impl Cache {
         trace!("Recur verify result {:#?}", res);
 
         res.name = json.get("name").ok_or(Error::NoneError)?.to_string();
-        res.data_input = json.get("data_input").ok_or(Error::NoneError)?.to_string();
+        // res.data_input = json.get("data_input").ok_or(Error::NoneError)?.to_string();
         res.result_type = run;
         Ok(res)
     }
